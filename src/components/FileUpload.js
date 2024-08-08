@@ -26,13 +26,14 @@ const FileUpload = () => {
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: false });
 
-  const uploadChunk = async (chunk, sessionId, chunkNumber, totalChunks) => {
+  const uploadChunk = async (chunk, sessionId, chunkNumber, totalChunks, fileSize) => {
     const formData = new FormData();
     formData.append('chunk', chunk);
     formData.append('sessionId', sessionId);
     formData.append('chunkNumber', chunkNumber);
     formData.append('totalChunks', totalChunks);
     formData.append('fileName', file.name);
+    formData.append('fileSize', fileSize); // Add file size
     try {
       await axios.post(`${BASE_URL}/fileupload/upload_chunk/`, formData, {
         timeout: 60000,  // 60 seconds timeout
@@ -51,6 +52,7 @@ const FileUpload = () => {
     const newSessionId = Date.now(); // Example session ID, you can generate a more complex one
     setSessionId(newSessionId);
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    const fileSize = file.size;
 
     setMetadata({ totalChunks, uploadedChunks: 0, startTime: new Date(), endTime: null, estimatedTime: null });
     setUploadProgress(0);
@@ -61,7 +63,7 @@ const FileUpload = () => {
     try {
       for (let i = 0; i < totalChunks; i++) {
         const chunk = file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-        await uploadChunk(chunk, newSessionId, i + 1, totalChunks);
+        await uploadChunk(chunk, newSessionId, i + 1, totalChunks, fileSize);
 
         // Calculate and update upload progress and estimated time
         const elapsedTime = (new Date() - startTime) / 1000; // seconds

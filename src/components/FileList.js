@@ -21,7 +21,7 @@ const FileList = () => {
   const handleDelete = (sessionId) => {
     axios.delete(`http://localhost:8000/fileupload/delete_upload/${sessionId}/`)
       .then(response => {
-        console.log(response)
+        // Refresh the file list after deletion
         fetchFiles();
       })
       .catch(error => {
@@ -40,6 +40,7 @@ const FileList = () => {
             <th>User ID</th>
             <th>Total Chunks</th>
             <th>Date Uploaded</th>
+            <th>File Size (MB)</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -51,6 +52,7 @@ const FileList = () => {
               <td>{file.user_id}</td>
               <td>{file.total_chunks}</td>
               <td>{new Date(file.date_uploaded).toLocaleString()}</td>
+              <td>{(file.file_size / (1024 * 1024)).toFixed(2)}</td>
               <td>
                 <button onClick={() => handleDelete(file.session_id)}>Delete</button>
               </td>
