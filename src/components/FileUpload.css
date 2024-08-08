@@ -1,0 +1,59 @@
+.file-upload-container {
+    width: 50%;
+    margin: auto;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #f9f9f9;
+  }
+  
+  .dropzone {
+    border: 2px dashed #cccccc;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 20px;
+    background-color: #e9e9e9;
+  }
+  
+  .dropzone p {
+    margin: 0;
+    font-size: 16px;
+    color: #666666;
+  }
+  
+  .file-details {
+    margin-bottom: 20px;
+  }
+  
+  button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #282c34;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  button:hover {
+    background-color: #61dafb;
+  }
+  
+  .progress-container {
+    margin-top: 20px;
+  }
+  
+  progress {
+    display: block;
+    width: 100%;
+    height: 20px;
+    margin-top: 10px;
+  }
+  
+  .metadata, .error-message {
+    margin-top: 20px;
+  }
+  
