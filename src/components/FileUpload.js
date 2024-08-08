@@ -12,6 +12,8 @@ const FileUpload = () => {
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [metadata, setMetadata] = useState({ totalChunks: 0, uploadedChunks: 0, startTime: null, endTime: null, estimatedTime: null });
+  const [assemblyStatus, setAssemblyStatus] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
 
   const onDrop = (acceptedFiles) => {
     setFile(acceptedFiles[0]);
@@ -19,17 +21,18 @@ const FileUpload = () => {
     setError(null);
     setIsUploading(false);
     setMetadata({ totalChunks: 0, uploadedChunks: 0, startTime: null, endTime: null, estimatedTime: null });
+    setAssemblyStatus(null);
   };
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: false });
 
-  const uploadChunk = async (chunk, sessionId, chunkNumber) => {
+  const uploadChunk = async (chunk, sessionId, chunkNumber, totalChunks) => {
     const formData = new FormData();
     formData.append('chunk', chunk);
     formData.append('sessionId', sessionId);
     formData.append('chunkNumber', chunkNumber);
+    formData.append('totalChunks', totalChunks);
     formData.append('fileName', file.name);
-
     try {
       await axios.post(`${BASE_URL}/fileupload/upload_chunk/`, formData, {
         timeout: 60000,  // 60 seconds timeout
@@ -45,7 +48,8 @@ const FileUpload = () => {
     if (!file) return;
     setIsUploading(true);
 
-    const sessionId = Date.now(); // Example session ID, you can generate a more complex one
+    const newSessionId = Date.now(); // Example session ID, you can generate a more complex one
+    setSessionId(newSessionId);
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
 
     setMetadata({ totalChunks, uploadedChunks: 0, startTime: new Date(), endTime: null, estimatedTime: null });
@@ -57,7 +61,7 @@ const FileUpload = () => {
     try {
       for (let i = 0; i < totalChunks; i++) {
         const chunk = file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-        await uploadChunk(chunk, sessionId, i + 1);
+        await uploadChunk(chunk, newSessionId, i + 1, totalChunks);
 
         // Calculate and update upload progress and estimated time
         const elapsedTime = (new Date() - startTime) / 1000; // seconds
@@ -69,15 +73,29 @@ const FileUpload = () => {
       }
 
       // Notify backend that all chunks have been uploaded
-      await axios.post(`${BASE_URL}/fileupload/complete_upload/`, { sessionId, fileName: file.name });
+      await axios.post(`${BASE_URL}/fileupload/complete_upload/`, { sessionId: newSessionId, fileName: file.name });
 
       setMetadata(prevMetadata => ({ ...prevMetadata, endTime: new Date() }));
       setUploadProgress(100);
+      pollAssemblyStatus(newSessionId);
     } catch (error) {
       console.error('Error during file upload:', error);
       setError('File upload failed. Please try again.');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const pollAssemblyStatus = async (sessionId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/fileupload/assembly_status/${sessionId}/`);
+      setAssemblyStatus(response.data.status);
+      if (response.data.status === 'in_progress') {
+        setTimeout(() => pollAssemblyStatus(sessionId), 2000);
+      }
+    } catch (error) {
+      console.error('Error checking assembly status:', error);
+      setError('Error checking assembly status. Please try again.');
     }
   };
 
@@ -109,6 +127,11 @@ const FileUpload = () => {
           {metadata.endTime && (
             <p>Upload Time: {(metadata.endTime - metadata.startTime) / 1000} seconds</p>
           )}
+        </div>
+      )}
+      {assemblyStatus && (
+        <div className="assembly-status">
+          <p>Assembly Status: {assemblyStatus}</p>
         </div>
       )}
     </div>
