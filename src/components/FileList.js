@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Définir le composant FileList
 const FileList = () => {
+  // État contenant la liste des fichiers
   const [files, setFiles] = useState([]);
 
+  // useEffect hook pour récupérer les fichiers lors du montage du composant
   useEffect(() => {
     fetchFiles();
   }, []);
 
+  // Fonction permettant de récupérer la liste des téléchargements terminés depuis le backend
   const fetchFiles = () => {
     axios.get('http://localhost:8000/fileupload/list_completed_uploads/')
       .then(response => {
+        // Mise à jour de l'état avec les données récupérées
         setFiles(response.data);
       })
       .catch(error => {
@@ -18,10 +23,11 @@ const FileList = () => {
       });
   };
 
+  // Fonction de suppression de fichiers
   const handleDelete = (sessionId) => {
     axios.delete(`http://localhost:8000/fileupload/delete_upload/${sessionId}/`)
       .then(response => {
-        // Refresh the file list after deletion
+        // Actualiser la liste des fichiers après leur suppression
         fetchFiles();
       })
       .catch(error => {

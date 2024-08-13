@@ -33,7 +33,7 @@ const FileUpload = () => {
     formData.append('chunkNumber', chunkNumber);
     formData.append('totalChunks', totalChunks);
     formData.append('fileName', file.name);
-    formData.append('fileSize', fileSize); // Add file size
+    formData.append('fileSize', fileSize);
     try {
       await axios.post(`${BASE_URL}/fileupload/upload_chunk/`, formData, {
         timeout: 60000,  // 60 seconds timeout
