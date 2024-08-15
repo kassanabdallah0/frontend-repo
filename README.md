@@ -33,16 +33,16 @@ Ce projet est un frontend développé en React.js, conçu pour interagir avec un
 
 ### 1. Cloner le Dépôt
 
-\`\`\`bash
+
 git clone https://github.com/kassanabdallah0/frontend-repo.git
 cd frontend-repo
-\`\`\`
+
 
 ### 2. Installer les Dépendances
 
-\`\`\`bash
+
 npm install
-\`\`\`
+
 
 ## Connexion avec le Backend
 
